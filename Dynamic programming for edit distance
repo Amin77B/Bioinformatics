@@ -1,0 +1,46 @@
+def read_fasta_generator(file_path):
+    """ Reads a FASTA file and yields the sequence line by line. """
+    with open(file_path, "r") as file:
+        for line in file:
+            if not line.startswith(">"):  # Ignore header lines
+                yield line.strip()  # Yield one line at a time
+
+human_seq = "".join(read_fasta_generator("/Users/amin/Desktop/pythonProject/Python Jadi Trainings/Human.fasta"))
+virus_seq = "".join(read_fasta_generator("/Users/amin/Desktop/pythonProject/Python Jadi Trainings/virus.fa"))
+
+
+#Dynamic programming edit distance algorithm
+
+def editDistance(x,y):
+    '''This function editDistance(x, y) computes the edit distance
+    (Levenshtein distance) between two strings x and y using bottom-up
+    dynamic programming. Unlike the recursive approach, this method stores
+    previous computations in a table (D) to avoid redundant calculations,
+    making it much more efficient (O(nm) time complexity).'''
+    #Initialization: Create the DP Table
+    D = [] #D is a matrix (2D list) of size (len(x)+1) × (len(y)+1).
+    for i in range(len(x) + 1): #Each cell D[i][j] represents the edit distance between x[0:i] and y[0:j].
+        D.append([0] * (len(y) + 1)) #The matrix is initialized with zeros.
+
+
+    #Fill Base Cases (Handling Empty Strings)
+    for i in range(len(x) + 1): #Filling the first column: If y is empty, converting x[0:i] to an empty string requires i deletions → D[i][0] = i
+        D[i][0] = i
+    for i in range(len(y) + 1): #Filling the first row: If x is empty, converting it to y[0:j] requires j insertions → D[0][j] = j
+        D[0][i] = i
+# Compute DP Table (Bottom-Up Approach)
+    for i in range(1, len(x) + 1): #Iterate row-wise through x and y starting from index 1.
+        for j in range(1, len(y) + 1): #Each cell D[i][j] is computed using three possible operations
+
+#Compute Cost of Each Operation
+            distHor = D[i][j - 1] + 1 #Insertion (distHor): Add y[j-1] into x[0:i], so we check the cost at D[i][j-1] and add 1.
+            distVer = D[i - 1][j] + 1 #Deletion (distVer): Remove x[i-1], so check D[i-1][j] and add 1.
+            if x[i -1] == y[j - 1]:
+                distDiag = D[i - 1][j - 1] # Characters match (no extra cost)
+            else:
+                distDiag = D[i - 1][j - 1] + 1 # Characters differ, so substitution cost = 1
+            D[i][j] = min(distHor, distVer, distDiag) #Store the minimum cost among insertion, deletion, and substitution in D[i][j].
+    return D[-1][-1] #The final cell D[len(x)][len(y)] contains the answer: the minimum edit distance to convert x into y.
+
+edit_distance = editDistance(human_seq, virus_seq)
+print("Edit Distance:", edit_distance)
